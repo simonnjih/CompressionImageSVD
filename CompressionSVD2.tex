@@ -1,0 +1,393 @@
+\documentclass[9pt]{beamer}
+\usepackage{amsmath}
+\usepackage[french]{babel}
+\setlength{\parskip}{5pt}
+\usepackage{ragged2e}\justifying
+\usepackage{graphicx}
+\usetheme{EastLansing}
+%\usepackage{Madrid}
+\graphicspath{{gfx/}}
+%\setbeamercovered{transparent=0}
+
+\title[APPLICATION DE COMPRESION]{ Décomposition en Valeur Singulières et Compression D’images : Concept Théorique,
+ Implémentation (avec PyTorch) et Applications.}
+\author[GROUPE 1]{Njitchoua Elisé Simon\\Towa  Tchaptchié fils Emmanuel\\Toussée cendra Nouvelle\\Magne Signé Mureille\\ \tiny simonnjih@yahoo.com\\[5mm] \includegraphics[scale=0.09]{logoia}}
+\institute[SDIA]{Departement GITSDIA\\ Science Des Données et Intélligence Artificielle\\Maths And AI for Science\\Douala, Cameroun}
+\date[\tiny \today]{\scriptsize \today}
+
+\AtBeginSection[]{
+  \begin{frame}{Plan de la section}
+    \tableofcontents[currentsection]
+  \end{frame}
+}
+
+
+%\logo{\includegraphics[scale=0.07]{logo_enspd}}
+
+\begin{document}
+
+\begin{frame}
+\maketitle
+\end{frame}
+
+\begin{frame}{Plan}
+  \tableofcontents
+\end{frame}
+
+\section{Introduction}
+\begin{frame}{Introduction}
+%\section{À la découverte de la SVD : une approche simple et éclairante}
+La quantité phénoménale de données visuelles générées chaque jour, qu’il s’agisse de photographies, de vidéos ou d’images médicales, impose des défis majeurs en termes de stockage et de transmission. Pour répondre à ces besoins, la compression d’image est devenue une discipline essentielle, permettant de réduire efficacement la taille des fichiers tout en préservant la qualité visuelle. Parmi les nombreuses techniques de compression, la décomposition en valeurs singulières (SVD) se distingue par sa puissance mathématique et sa capacité à révéler la structure intrinsèque des images.
+
+\pause
+La SVD est une méthode fondamentale en algèbre linéaire, qui factorise une matrice en un produit de trois matrices particulières, mettant en lumière ses composantes principales. Appliquée aux images, cette décomposition permet d’identifier et de classer les informations visuelles selon leur importance énergétique. En conservant uniquement les valeurs singulières les plus significatives, il devient possible de reconstruire une approximation de l’image originale avec une perte d’information contrôlée, offrant ainsi un compromis idéal entre compression et fidélité.
+
+\end{frame}
+
+%-------------------------------
+\section{À la découverte de la SVD : une approche simple et éclairante}
+\subsection{Tois Elements Clés}
+\begin{frame}{Trois éléments clés}
+%\subsection{Tois Elements Clés}
+Les élements clés de la compression : 
+\begin{itemize}
+  \item La matrice d’image
+  \item La décomposition SVD
+  \item La réduction du rang
+\end{itemize}
+\end{frame}
+
+%---------------
+\begin{frame}{À la découverte de la SVD : une approche simple et éclairante}
+%\subsection{À la découverte de la SVD : une approche simple et éclairante}
+Dans un souci de clarté et d’accessibilité, nous commençons par une approche simple, épurée de toute complexité superflue. Cette première approche a pour objectif de dévoiler l’intuition fondamentale derrière la décomposition en valeurs singulières (SVD) et son application à la compression d’images.
+\pause 
+\begin{block}{Définition}
+Une image (en niveaux de gris) peut être représentée par une \textbf{matrice}, où chaque élément correspond à un \textbf{pixel} et sa valeur à une \textbf{intensité lumineuse}.
+\end{block}
+
+\pause
+
+\[
+A =
+\begin{bmatrix}
+10 & 70 & 20 \\
+60 & 80 & 40 \\
+30 & 90 & 50
+\end{bmatrix}
+\]
+\end{frame}
+
+%-------------------------------
+\subsection{Décomposition SVD}
+\begin{frame}{Décomposition SVD}
+\begin{block}{Formule}
+Pour toute matrice $A$, il existe une factorisation :
+\[
+A = U \Sigma V^T
+\]
+\end{block}
+
+\begin{itemize}
+  \item $U$ : vecteurs singuliers à gauche (structure par lignes)
+  \item $\Sigma$ : matrice diagonale contenant les \textbf{valeurs singulières}
+  \item $V^T$ : vecteurs singuliers à droite (structure par colonnes)
+\end{itemize}
+\end{frame}
+
+%--------------------------
+\subsection{Valeurs singulières}
+\begin{frame}{Valeurs singulières}
+\begin{block}{Définition}
+Les \textbf{valeurs singulières} sont les racines carrées des valeurs propres de $A^T A$.
+\end{block}
+
+\pause
+
+\[
+\Sigma =
+\begin{bmatrix}
+165.52 & 0 & 0 \\
+0 & 30.94 & 0 \\
+0 & 0 & 12.11
+\end{bmatrix}
+\]
+
+\begin{itemize}
+  \item $165.52$ : composante dominante
+  \item $30.94$ : significative
+  \item $12.11$ : faible impact visuel
+\end{itemize}
+\end{frame}
+
+%-----------------------------------------
+\subsection{SVD complète – Exemple}
+\begin{frame}{SVD complète – Exemple}
+\small
+
+\[
+U =
+\begin{bmatrix}
+-0.4249 & 0.6406 & -0.6396 \\
+-0.6365 & -0.7138 & -0.2921 \\
+-0.6436 & 0.2830 & 0.7111
+\end{bmatrix}
+\quad
+V^T =
+\begin{bmatrix}
+-0.3731 & -0.8373 & -0.3996 \\
+-0.9029 & 0.4268 & -0.0514 \\
+-0.2136 & -0.3416 & 0.9152
+\end{bmatrix}
+\]
+\end{frame}
+
+%-----------------------------------------------------------
+\begin{frame}{Réduction de rang : Compression}
+\begin{block}{Idée}
+Pour compresser, on garde seulement les plus grandes valeurs singulières.
+\end{block}
+
+\pause
+
+\[
+\Sigma_k =
+\begin{bmatrix}
+165.52 & 0 & 0 \\
+0 & 30.94 & 0 \\
+0 & 0 & 0
+\end{bmatrix}
+\]
+
+\pause
+
+\[
+A_k = U \Sigma_k V^T =
+\begin{bmatrix}
+8.35 & 67.36 & 27.09 \\
+59.25 & 78.79 & 43.24 \\
+31.84 & 92.94 & 42.12
+\end{bmatrix}
+\]
+
+Forts de notre compréhension initiale, nous pouvons désormais aborder une application plus complète de la SVD, en capitalisant sur les éléments étudiés jusqu’ici.
+\end{frame}
+
+%-------------------------------
+\section{Structure Méthodologique Globale}
+\subsection{Principe}
+\begin{frame}{Structure Méthodologique Globale}
+%\section{Structure Méthodologique Globale}
+
+Toute matrice $I$ de taille $m \times n$ de rang $r$ peut être décomposée en une somme pondérée de matrices unitaires $m \times n$ par Décomposition en Valeurs Singulières. Les matrices $U$ et $V$ sont unitaires et $I$ peut donc s’écrire :
+
+\begin{equation}
+I = U S V^T = \sum_{i=1}^{n} \sigma_i u_i v_i^T 
+\end{equation}
+\pause
+où $S$ est une matrice dont les $r$ premiers termes diagonaux sont positifs, tous les autres étant nuls. Les $r$ termes $\sigma_i$ non nuls sont appelés valeurs singulières de $I$ :
+
+\[
+S = 
+\begin{pmatrix}
+\sigma_1 & 0 & \cdots & 0 \\
+0 & \sigma_2 & \cdots & 0 \\
+\vdots & \vdots & \ddots & \vdots \\
+0 & 0 & \cdots & \sigma_n
+\end{pmatrix}
+\quad \text{avec} \quad \sigma_1 \geq \sigma_2 \geq \cdots \geq \sigma_r > 0, \quad \sigma_{r+1} = \cdots = \sigma_n = 0
+\]
+
+
+\end{frame}
+\subsection{Application de la SVD en compression d’images}
+\begin{frame}{Application de la SVD en compression d’images}
+
+
+Les valeurs singulières représentent l’énergie de l’image. En effet, l’énergie totale de l’image $I$ est représentée dans la formule suivante :
+
+\begin{equation}
+\left\| I \right\| = \text{trace}\left[I^T I \right] = \sum_{i=1}^{m} \sum_{j=1}^{n} I(i,j)^2 = \sum_{i=1}^{n} \sigma_i^2 
+\end{equation}
+\pause
+La compression d’une image à niveaux de gris vient donc intuitivement en forçant les valeurs singulières les plus faibles à zéro. En ne sélectionnant que les $k$ ($k \leq n$) premières valeurs singulières, on peut approximer la matrice $I$ par la formule :
+
+
+
+\end{frame}
+
+\begin{frame}{Application de la SVD en compression d’images}
+  
+\begin{equation}
+I_k = U_k S_k V_k^T = \sum_{i=1}^{k} \sigma_i u_i v_i^T 
+\end{equation}
+\pause
+$S_k$ représente la matrice des $k$ valeurs singulières compressée. Le produit $U \times S_k$ représente la composante principale \cite{ref4} de l’image. L’énergie correspondante est :
+
+\begin{equation}
+\left\| I_k \right\| = \text{trace}\left[I_k^T I_k \right] = \sum_{i=1}^{k} \sigma_i^2 
+\end{equation}
+Notons \textbf{SVD-k} le codage d’une image à l’aide de $k$ valeurs singulières.
+\begin{figure}[H] % "H" force le placement ici (grâce au package "float")
+       \centering
+       \includegraphics[width=1\textwidth]{co.png} % Modifier le chemin et le format
+       \caption{Codage SVD pour un nombre k de valeurs singulières}
+       \label{fig:incarnation}
+  \end{figure}    
+\end{frame}
+
+\subsection{Ratio}
+\begin{frame}{Ratio}
+
+
+Le ratio $G$ du codage est exprimé par la formule suivante :
+
+\begin{equation}
+G = \frac{m \times n}{k \times (m + n + 1)}
+\end{equation}
+
+Comme $G$ doit être supérieur à $1$, il faut donc choisir $k$ tel que :
+\pause
+\begin{equation}
+k < \frac{m \times n}{m + n + 1}
+\end{equation}
+
+Pour la compression d’images couleurs, \textsc{Cooper} a proposé d’appliquer la même approximation aux trois composantes $R$, $V$ et $B$. Dans ce cas, le ratio est égal à $G$ de l’équation (6).
+
+\end{frame}
+
+\begin{frame}{Ratio}
+Les tests ont été effectués sur les images SNNJ.
+
+Le \textbf{PSNR} (Peak Signal to Noise Ratio) a été choisi pour mesurer la distorsion correspondant à un ratio donné. Soit $I$ l’image originale et $I_k$ l’image compressée. On a :
+
+\begin{equation}
+\mathrm{PSNR} = 10 \times \log_{10} \left( \frac{\max(I(i,j))^2}{\mathrm{EQM}} \right)
+\label{eq:psnr}
+\end{equation}
+\pause
+où \(\max(I(i,j))\) est la valeur maximale des pixels de l’image originale, et \(\mathrm{EQM}\) est l’erreur quadratique moyenne définie par :
+
+\begin{equation}
+\mathrm{EQM} = \frac{1}{m \times n} \sum_{i=1}^{m} \sum_{j=1}^{n} \left( I(i,j) - I_k(i,j) \right)^2
+\label{eq:eqm}
+\end{equation}
+
+\end{frame}
+\section{Résultats}
+\begin{frame}{Résultats}
+
+\begin{figure}[H] % "H" force le placement ici (grâce au package "float")
+       \centering
+       \includegraphics[width=0.99\textwidth]{co2.png} % Modifier le chemin et le format
+       \caption{resultat de compression}
+       \label{fig:incarnation}
+  \end{figure}
+  
+\end{frame}
+
+\section{Analyse des résultats de compression}
+\begin{frame}{Analyse des résultats de compression}
+
+Les résultats obtenus lors de la compression de l'image peuvent être interprétés de la manière suivante :
+
+\begin{itemize}
+    \item \textbf{Taille originale (approx.) :}  \\
+    Il s'agit de la taille approximative du fichier image avant compression. 
+  \pause  
+    \item \textbf{Taille compressée (approx.) :} \\
+    Cette taille correspond au fichier image après application de la méthode de compression, ici basée sur la décomposition en valeurs singulières (SVD). 
+   \pause 
+    \item \textbf{Taux de compression :} 15.69\% \\
+    Ce taux exprime le pourcentage de la taille compressée par rapport à la taille originale. Un taux de 15.69\% signifie que le fichier compressé ne représente qu'une petite fraction de la taille initiale. 
+    \[
+\text{Taux de compression} = \left(\frac{\text{Taille compressée}}{\text{Taille originale}}\right) \times 100
+\]
+
+\end{itemize} 
+
+\end{frame}
+\begin{frame}{Analyse des résultats de compression}
+
+\begin{itemize}
+    \item \textbf{Erreur quadratique moyenne (MSE) totale :} 245.1612  \\
+    La MSE est une mesure quantitative de la différence moyenne entre les pixels de l'image originale et ceux de l'image compressée. Une MSE faible indique une bonne fidélité de reconstruction. Ici, la valeur 245.16123 montre une certaine perte d'information liée à la compression, mais qui reste souvent acceptable visuellement selon le contexte et les applications.
+    \pause
+    \item \textbf{PSNR :}En général, un PSNR supérieur à 30 dB est considéré comme une compression acceptable, où les différences visuelles entre l'image originale et l'image compressée sont peu perceptibles à l'œil humain.
+    
+\end{itemize}
+
+Ces résultats montrent que la méthode de compression par SVD permet une réduction substantielle de la taille des fichiers image tout en maîtrisant l’erreur introduite. L'équilibre entre taux de compression et qualité visuelle dépend du choix des paramètres, notamment le nombre de valeurs singulières conservées.
+\end{frame}
+\begin{frame}{Pourquoi cela fonctionne-t-il ?}
+\begin{itemize}
+  \item Les images présentent des \textbf{redondances visuelles}.
+  \item Les petites valeurs singulières correspondent à des détails fins peu perceptibles.
+  \item En les supprimant, on réduit la taille sans perdre trop de qualité.
+\end{itemize}
+
+\pause
+
+\begin{alertblock}{Compromis}
+Plus on garde de valeurs singulières, meilleure est la qualité – mais le fichier est plus grand.
+\end{alertblock}
+\end{frame}
+
+%-------------------------------
+\section{Conclusion}
+\begin{frame}{Conclusion}
+  \begin{itemize}
+    \item La SVD est une belle application mathématique à la compression d’images.
+    \item Elle permet un compromis entre qualité visuelle et taille de fichier.
+    \item Elle illustre comment les mathématiques rendent la technologie plus efficace.
+  \end{itemize}
+
+\pause
+
+\centering
+\textit{« Les mathématiques rendent l'invisible visible. »}
+\end{frame}
+
+
+
+\begin{thebibliography}{9}
+
+\bibitem{Razafindradina2025}
+Henri Bruno Razafindradina et Nicolas Raft Razafindrakoto, \\
+\textit{Compression d’images par SVD et surapproximation des composantes de chrominance}, \\
+L.I.I.S.T.A., École Supérieure Polytechnique d’Antananarivo, Université d’Antananarivo, Madagascar, 2025. \\
+Emails : hbazafindradina@gmail.com, raft@nic.mg
+
+\end{thebibliography}
+
+\begin{thebibliography}{9}
+
+\bibitem{WikipediaSVD}
+Wikipedia contributors, \textit{Décomposition en valeurs singulières}, Wikipedia, The Free Encyclopedia, \\
+\url{https://fr.wikipedia.org/wiki/D%C3%A9composition_en_valeurs_singuli%C3%A8res}, consulté le 25 juin 2025.
+
+\end{thebibliography}
+
+
+\begin{thebibliography}{8}
+
+\bibitem{Cooper I., Lorenc C}
+Cooper I., Lorenc C, \\
+\textit{Image Compression Using Singular Value Decomposition} \\
+ College
+of the Redwoods, 2006, 1-22. \\
+
+
+\end{thebibliography}
+
+\begin{thebibliography}{11}
+\bibitem{Roue B., Bas P., Le Bihan N}
+Roue B., Bas P., Le Bihan N ,\\
+\textit{Décomposition et codage hypercomplexes des images
+couleurs}, \\
+Mémoire de DEA laboratoire, Grenoble, Laboratoire LIS, 2003. \\
+
+
+\end{thebibliography}
+
+\end{document}

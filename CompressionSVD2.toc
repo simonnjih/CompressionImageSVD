@@ -1,0 +1,14 @@
+\babel@toc {french}{}\relax 
+\beamer@sectionintoc {1}{Introduction}{3}{0}{1}
+\beamer@sectionintoc {2}{À la découverte de la SVD : une approche simple et éclairante}{6}{0}{2}
+\beamer@subsectionintoc {2}{1}{Tois Elements Clés}{7}{0}{2}
+\beamer@subsectionintoc {2}{2}{Décomposition SVD}{11}{0}{2}
+\beamer@subsectionintoc {2}{3}{Valeurs singulières}{12}{0}{2}
+\beamer@subsectionintoc {2}{4}{SVD complète – Exemple}{14}{0}{2}
+\beamer@sectionintoc {3}{Structure Méthodologique Globale}{18}{0}{3}
+\beamer@subsectionintoc {3}{1}{Principe}{19}{0}{3}
+\beamer@subsectionintoc {3}{2}{Application de la SVD en compression d’images}{21}{0}{3}
+\beamer@subsectionintoc {3}{3}{Ratio}{25}{0}{3}
+\beamer@sectionintoc {4}{Résultats}{29}{0}{4}
+\beamer@sectionintoc {5}{Analyse des résultats de compression}{31}{0}{5}
+\beamer@sectionintoc {6}{Conclusion}{39}{0}{6}
